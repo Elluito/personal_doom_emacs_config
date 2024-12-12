@@ -6,8 +6,8 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
- (setq user-full-name "Luis Alfredo Avendaño Muñoz"
-       user-mail-address "alfredoavendano@hotmail.com")
+(setq user-full-name "Luis Alfredo Avendaño Muñoz"
+      user-mail-address "alfredoavendano@hotmail.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
@@ -21,8 +21,8 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
-;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+(setq doom-font (font-spec :family "Fira Code" :size 15 :weight 'semi-light)
+      doom-variable-pitch-font (font-spec :family "Noto Sans" :size 16))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -32,11 +32,12 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+;; (setq doom-theme 'doom-monokai-pro)
+(setq doom-theme 'doom-gruvbox)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
+(setq display-line-numbers-type 'relative)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -78,38 +79,42 @@
 ;; ################ Start as server  ###################
 ;; This is just so it can do inverse search with okular while wirting latex documents
 
-;(server-start)
-; Aparently doom emac start the server itself acording to numeral 7 on this link https://discourse.doomemacs.org/t/common-config-anti-patterns/119
+                                        ;(server-start)
+                                        ; Aparently doom emac start the server itself acording to numeral 7 on this link https://discourse.doomemacs.org/t/common-config-anti-patterns/119
 
 
 
 ;; ################ Latex editing #####################
-
-
-;; ;; This to use the pdf viewer
 ;; (after! latex
-(setq +latex-viewers '(pdf-tools))
-;; (setq +latex-viewers '(okular))
-;; ;; LSP server fot latex
+;; (setq +latex-viewers '(pdf-tools))
+;; These two lines are to ensure that LaTex-mode gets activated on every .tex
+;; This has to do with some issue with versions of emacs older thatn 30  see : https://github.com/doomemacs/doomemacs/issues/8191
+(add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
+(setq major-mode-remap-alist major-mode-remap-defaults)
+
+;; This to use the pdf viewer
+(setq +latex-viewers '(okular))
+;; LSP server fot latex This still does not works texlab does not work as intended
 (setq lsp-tex-server 'texlab)
 ;; ;(after! latex
-;; ;; This is for useing xenops for rendering tables in buffer
+;; ;; This is for useing xenops for endering tables in buffer
 ;;
-(after! latex
-(add-hook 'LaTeX-mode-hook #'xenops-mode) ;
-;; Turn on RefTeX in AUCTeX
-(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-(setq reftex-plug-into-AUCTeX t)
-  ;; )                                     ;
-;; ; This is for inverse search  taken from https://inthearmchair.wordpress.com/2010/09/02/latex-inverse-pdf-search-with-emacs/
-;; ;(add-hook ‘LaTeX-mode-hook ‘TeX-DF-mode)
-;; ;'(LaTeX-command "latex -synctex=1")
-;; ;'(TeX-output-view-style '(("^pdf$" "." "okular %s.pdf")))
 
-;; ;Taken from https://michaelneuper.com/posts/efficient-latex-editing-with-emacs/#cdlatex
-(map! :map cdlatex-mode-map
-      :i "TAB" #'cdlatex-tab)
-)
+(after! latex
+  (add-hook 'LaTeX-mode-hook #'xenops-mode) ;
+  ;; Turn on RefTeX in AUCTeX
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+  (setq reftex-plug-into-AUCTeX t)
+  ;; )                                     ;
+  ;; ; This is for inverse search  taken from https://inthearmchair.wordpress.com/2010/09/02/latex-inverse-pdf-search-with-emacs/
+  ;; ;(add-hook ‘LaTeX-mode-hook ‘TeX-DF-mode)
+  ;; ;'(LaTeX-command "latex -synctex=1")
+  ;; ;'(TeX-output-view-style '(("^pdf$" "." "okular %s.pdf")))
+
+  ;; ;Taken from https://michaelneuper.com/posts/efficient-latex-editing-with-emacs/#cdlatex
+  (map! :map cdlatex-mode-map
+        :i "TAB" #'cdlatex-tab)
+  )
 
 ;; Activate nice interface between RefTeX and AUCTeX
 
@@ -118,28 +123,39 @@
 ;;################# Biblio ############################
 (after! citar
   (setq! citar-bibliography '("~/home/luisaam/Documents/Thesis/References/all_zotero_references.bib"))
-  (setq! citar-library-paths '("~/home/luisaam/Documents/Thesis/References/"))
+  (setq! citar-library-paths '("~/home/luisaam/Documents/Thesis/bReferences/"))
   (setq! citar-notes-paths '("~/references/notes")))
 
+(setq reftex-default-bibliography "~/home/luisaam/Documents/Thesis/References/all_zotero_references.bib")
 ;; ################  Sniper package #####################
 ;;
 (after! evil-snipe
   (evil-snipe-mode +1)
-(evil-snipe-override-mode +1)
-(add-hook 'magit-mode-hook 'turn-off-evil-snipe-override-mode)
-(setq evil-snipe-scope 'whole-visible)
-)
+  (evil-snipe-override-mode +1)
+  (add-hook 'magit-mode-hook 'turn-off-evil-snipe-override-mode)
+  (setq evil-snipe-scope 'whole-visible)
+  )
 
 
 ;; ###########################################################
 ;;                      Auto save
 ;; ###########################################################
 (after! super-save
-;; This auto saves the buffer when I change focus
-(super-save-mode +1)
-;;Saves when idle
-(setq super-save-auto-save-when-idle t)
-;; deactivates emacs's default autosave (it already is turned off by default in doom emacs but ill put it her anyway)
-(setq auto-save-default nil)
+  ;; This auto saves the buffer when I change focus
+  (super-save-mode +1)
+  ;;Saves when idle
+  (setq super-save-auto-save-when-idle t)
+  ;; deactivates emacs's default autosave (it already is turned off by default in doom emacs but ill put it her anyway)
+  (setq auto-save-default nil)
+  )
 
-)
+;; ################ Evil-mode settings #####################
+;; Respect visual lines when moving
+(setq visual-line-mode t)
+;; This is for moving on the visual lines
+(map! :n "j" #'evil-next-visual-line
+      :n "k" #'evil-previous-visual-line)
+;; ########### Good Scroll mode #####################
+;; https://github.com/io12/good-scroll.el
+;; I wanted to do something like the smooth scroll in neovide
+;; (good-scroll-mode 1)
