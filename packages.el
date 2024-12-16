@@ -8,7 +8,7 @@
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;; (package! some-package)
-;(package! )
+                                        ;(package! )
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
 ;; https://github.com/radian-software/straight.el#the-recipe-format
@@ -72,3 +72,8 @@
   :recipe (:host github
            :repo "zzamboni/750words-client"
            :files ("*.el")))
+;; ############## doct pacakgae for org-capture ############
+                                        ; Taken from config: https://tecosaur.github.io/emacs-config/config.html;
+(package! doct
+  :recipe (:host github :repo "progfolio/doct")
+  :pin "5cab660dab653ad88c07b0493360252f6ed1d898")
