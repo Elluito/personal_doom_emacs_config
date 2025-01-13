@@ -33,7 +33,7 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 ;; (setq doom-theme 'doom-monokai-pro)
-(setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'doom-gruvbox-light)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -358,3 +358,35 @@
 ;;         (interactive)
 ;;         (set-window-parameter nil 'mode-line-format 'none)
 ;;         (org-capture)))
+
+;;################# Activate beacon mode ###############################
+(beacon-mode 1)
+;;################# Evil easy-motion ###############################
+
+(evilem-default-keybindings "SPC")
+
+;;;;################# Evil mode trainer ###############################
+;; Trainer on all the time
+(global-evil-motion-trainer-mode 1)
+;;Configure the number of permitted repeated key presses:
+(setq evil-motion-trainer-threshold 10)
+                                        ;Enable a super annoying mode that pops a warning in a buffer:
+(setq evil-motion-trainer-super-annoying-mode t)
+;; Add to the suggested alternatives for a key:
+;; (emt-add-suggestion 'evil-next-line 'evil-avy-goto-char-timer)
+(emt-add-suggestion 'evil-next-line)
+;; See also: (emt-add-suggestions)
+;;################# Evil owl config ###############################
+;; (use-package evil-owl
+;;   :config
+;;   (setq evil-owl-display-method 'posframe
+;;         evil-owl-extra-posframe-args '(:width 50 :height 20)
+;;         evil-owl-max-string-length 50)
+;;   (evil-owl-mode))
+;; Using posframe
+(use-package evil-owl
+  :config
+  (setq evil-owl-display-method 'posframe
+        evil-owl-extra-posframe-args '(:width 50 :height 20)
+        evil-owl-max-string-length 50)
+  (evil-owl-mode))

@@ -77,3 +77,27 @@
 (package! doct
   :recipe (:host github :repo "progfolio/doct")
   :pin "5cab660dab653ad88c07b0493360252f6ed1d898")
+
+;; ####################### Lean 4 prover mode ############################
+                                        ;
+(package! lean4-mode
+  :recipe (:host github
+           :repo "leanprover-community/lean4-mode"
+           :files ("*.el" "data")))
+
+;; 2048 game in emacs
+(package! 2048-game)
+;;                               beacon animation for cursor movement
+(package! beacon)
+
+;;################################### Undo tree ####################################
+(package! undo-tree)
+;;################################### evil-easymotion ####################################
+(package! evil-easymotion)
+;;################################### Evil motion trainer ####################################
+(package! evil-motion-trainer-mode
+  :recipe (:host github
+           :repo "martinbaillie/evil-motion-trainer"
+           :files ("*.el" "data")))
+;;################################### Evil-owl (shows pop up register window) ####################################
+(package! evil-owl)
