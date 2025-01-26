@@ -39,6 +39,7 @@
 
 ;; Use `:pin' to specify a particular commit to install.
 ;; (package! builtin-package :pin "1a2b3c4d5e")
+;;
 
 
 ;; Doom's packages are pinned to a specific commit and updated from release to
@@ -101,3 +102,6 @@
            :files ("*.el" "data")))
 ;;################################### Evil-owl (shows pop up register window) ####################################
 (package! evil-owl)
+                                        ;##### Evil Nerd Commenter#############
+                                        ;maybe enable evil-googles-nerd-commenter in the config file
+(package! evil-nerd-commenter)

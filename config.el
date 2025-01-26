@@ -363,18 +363,30 @@
 (beacon-mode 1)
 ;;################# Evil easy-motion ###############################
 
-(evilem-default-keybindings "SPC")
 
+(evilem-default-keybindings "|")
+
+(evilem-define (kbd "| s") 'evil-snipe-repeat
+               :pre-hook (save-excursion (call-interactively #'evil-snipe-s))
+               :bind ((evil-snipe-scope 'buffer)
+                      (evil-snipe-enable-highlight)
+                      (evil-snipe-enable-incremental-highlight)))
+
+(evilem-define (kbd "| S") 'evil-snipe-repeat-reverse
+               :pre-hook (save-excursion (call-interactively #'evil-snipe-s))
+               :bind ((evil-snipe-scope 'buffer)
+                      (evil-snipe-enable-highlight)
+                      (evil-snipe-enable-incremental-highlight)))
 ;;;;################# Evil mode trainer ###############################
 ;; Trainer on all the time
 (global-evil-motion-trainer-mode 1)
 ;;Configure the number of permitted repeated key presses:
 (setq evil-motion-trainer-threshold 10)
                                         ;Enable a super annoying mode that pops a warning in a buffer:
-(setq evil-motion-trainer-super-annoying-mode t)
+                                        ;(setq evil-motion-trainer-super-annoying-mode t)
 ;; Add to the suggested alternatives for a key:
 ;; (emt-add-suggestion 'evil-next-line 'evil-avy-goto-char-timer)
-(emt-add-suggestion 'evil-next-line)
+;; (emt-add-suggestion 'evil-next-line)
 ;; See also: (emt-add-suggestions)
 ;;################# Evil owl config ###############################
 ;; (use-package evil-owl
@@ -390,3 +402,5 @@
         evil-owl-extra-posframe-args '(:width 50 :height 20)
         evil-owl-max-string-length 50)
   (evil-owl-mode))
+;;################## Maximized on start up #################
+radd-to-list 'initial-frame-alist '(fullscreen . maximized))
