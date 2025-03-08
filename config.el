@@ -33,7 +33,7 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 ;; (setq doom-theme 'doom-monokai-pro)
-(setq doom-theme 'doom-gruvbox-light)
+(setq doom-theme 'doom-gruvbox)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -42,28 +42,6 @@
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
-
-                                        ;################ Org-capture code ########################################
-                                        ; this piece of code is taken from https://gist.github.com/progfolio/af627354f87542879de3ddc30a31adc1
-(defun my/delete-capture-frame (&rest _)
-  "Delete frame with its name frame-parameter set to \"capture\"."
-  (if (equal "capture" (frame-parameter nil 'name))
-      (delete-frame)))
-
-(advice-add 'org-capture-finalize :after #'my/delete-capture-frame)
-(defun my/org-capture-frame ()
-  "Run org-capture in its own frame."
-  (interactive)
-  (require 'cl-lib)
-  (select-frame-by-name "capture")
-  (delete-other-windows)
-  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
-    (condition-case err
-        (org-capture)
-      ;; "q" signals (error "Abort") in `org-capture'
-      ;; delete the newly created frame in this scenario.
-      (user-error (when (string= (cadr err) "Abort")
-                    (delete-frame))))))
 
 
 
@@ -184,180 +162,216 @@
 ;; I wanted to do something like the smooth scroll in neovide
 ;; (good-scroll-mode 1)
 
-                                        ; #################### org- capture config###################
-                                        ; Taken from  https://tecosaur.github.io/emacs-config/config.html
-                                        ;TODO: Fix the FIXME down here to actually use this prettu config
-;; (after! org-capture
-;;                                         ; <<prettify-capture>>
+;;################ Org-capture code ########################################
+;; this piece of code is taken from https://gist.github.com/progfolio/af627354f87542879de3ddc30a31adc1
+(defun my/delete-capture-frame (&rest _)
+  "Delete frame with its name frame-parameter set to \"capture\"."
+  (if (equal "capture" (frame-parameter nil 'name))
+      (delete-frame)))
 
-;;   (defun +doct-icon-declaration-to-icon (declaration)
-;;     "Convert :icon declaration to icon"
-;;     (let ((name (pop declaration))
-;;           (set  (intern (concat "nerd-icons-" (plist-get declaration :set))))
-;;           (face (intern (concat "nerd-icons-" (plist-get declaration :color))))
-;;           (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
-;;       (apply set `(,name :face ,face :v-adjust ,v-adjust))))
+(advice-add 'org-capture-finalize :after #'my/delete-capture-frame)
+(defun my/org-capture-frame ()
+  "Run org-capture in its own frame."
+  (interactive)
+  (require 'cl-lib)
+  (select-frame-by-name "capture")
+  (delete-other-windows)
+  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+    (condition-case err
+        (org-capture)
+      ;; "q" signals (error "Abort") in `org-capture'
+      ;; delete the newly created frame in this scenario.
+      (user-error (when (string= (cadr err) "Abort")
+                    (delete-frame))))))
+;; #################### org- capture config###################
+;; Taken from  https://tecosaur.github.io/emacs-config/config.html
+;;TODO: Fix the FIXME down here to actually use this pretty config
+(after! org-capture
+                                        ; <<prettify-capture>>
+  (defun +doct-icon-declaration-to-icon (declaration)
+    "Convert :icon declaration to icon"
+    (let ((name (pop declaration))
+          (set  (intern (concat "nerd-icons-" (plist-get declaration :set))))
+          (face (intern (concat "nerd-icons-" (plist-get declaration :color))))
+          (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
+      (apply set `(,name :face ,face :v-adjust ,v-adjust))))
 
-;;   (defun +doct-iconify-capture-templates (groups)
-;;     "Add declaration's :icon to each template group in GROUPS."
-;;     (let ((templates (doct-flatten-lists-in groups)))
-;;       (setq doct-templates (mapcar (lambda (template)
-;;                                      (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
-;;                                                  (spec (plist-get (plist-get props :doct) :icon)))
-;;                                        (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
-;;                                                                       "\t"
-;;                                                                       (nth 1 template))))
-;;                                      template)
-;;                                    templates))))
+  (defun +doct-iconify-capture-templates (groups)
+    "Add declaration's :icon to each template group in GROUPS."
+    (let ((templates (doct-flatten-lists-in groups)))
+      (setq doct-templates (mapcar (lambda (template)
+                                     (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
+                                                 (spec (plist-get (plist-get props :doct) :icon)))
+                                       (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
+                                                                      "\t"
+                                                                      (nth 1 template))))
+                                     template)
+                                   templates))))
 
-;;   (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
-;; ;
-;; ;FIXME:Change the location of this and find out what recipies.org mean
-;; ;
-;;   (defvar +org-capture-recipies  "~/Desktop/TEC/Organisation/recipies.org")
+  (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
+                                        ;
+                                        ;FIXME: Find out what recipies.org mean
+                                        ;
+  (defvar +org-capture-recipies  "~/Organisation/recipies.org")
 
-;;   (defun set-org-capture-templates ()
-;;     (setq org-capture-templates
-;;           (doct `(("Personal todo" :keys "t"
-;;                    :icon ("nf-oct-checklist" :set "octicon" :color "green")
-;;                    :file +org-capture-todo-file
-;;                    :prepend t
-;;                    :headline "Inbox"
-;;                    :type entry
-;;                    :template ("* TODO %?"
-;;                               "%i %a"))
-;;                   ("Personal note" :keys "n"
-;;                    :icon ("nf-fa-sticky_note_o" :set "faicon" :color "green")
-;;                    :file +org-capture-todo-file
-;;                    :prepend t
-;;                    :headline "Inbox"
-;;                    :type entry
-;;                    :template ("* %?"
-;;                               "%i %a"))
-;;                   ("Email" :keys "e"
-;;                    :icon ("nf-fa-envelope" :set "faicon" :color "blue")
-;;                    :file +org-capture-todo-file
-;;                    :prepend t
-;;                    :headline "Inbox"
-;;                    :type entry
-;;                    :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
-;;                               "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
-;;                               "about %^{topic}"
-;;                               "%U %i %a"))
-;;                   ("Interesting" :keys "i"
-;;                    :icon ("nf-fa-eye" :set "faicon" :color "lcyan")
-;;                    :file +org-capture-todo-file
-;;                    :prepend t
-;;                    :headline "Interesting"
-;;                    :type entry
-;;                    :template ("* [ ] %{desc}%? :%{i-type}:"
-;;                               "%i %a")
-;;                    :children (("Webpage" :keys "w"
-;;                                :icon ("nf-fa-globe" :set "faicon" :color "green")
-;;                                :desc "%(org-cliplink-capture) "
-;;                                :i-type "read:web")
-;;                               ("Article" :keys "a"
-;;                                :icon ("nf-fa-file_text_o" :set "faicon" :color "yellow")
-;;                                :desc ""
-;;                                :i-type "read:reaserch")
-;;                               ("\tRecipie" :keys "r"
-;;                                :icon ("nf-fa-spoon" :set "faicon" :color "dorange")
-;;                                :file +org-capture-recipies
-;;                                :headline "Unsorted"
-;;                                :template "%(org-chef-get-recipe-from-url)")
-;;                               ("Information" :keys "i"
-;;                                :icon ("nf-fa-info_circle" :set "faicon" :color "blue")
-;;                                :desc ""
-;;                                :i-type "read:info")
-;;                               ("Idea" :keys "I"
-;;                                :icon ("nf-md-chart_bubble" :set "mdicon" :color "silver")
-;;                                :desc ""
-;;                                :i-type "idea")))
-;;                   ("Tasks" :keys "k"
-;;                    :icon ("nf-oct-inbox" :set "octicon" :color "yellow")
-;;                    :file +org-capture-todo-file
-;;                    :prepend t
-;;                    :headline "Tasks"
-;;                    :type entry
-;;                    :template ("* TODO %? %^G%{extra}"
-;;                               "%i %a")
-;;                    :children (("General Task" :keys "k"
-;;                                :icon ("nf-oct-inbox" :set "octicon" :color "yellow")
-;;                                :extra "")
-;;                               ("Task with deadline" :keys "d"
-;;                                :icon ("nf-md-timer" :set "mdicon" :color "orange" :v-adjust -0.1)
-;;                                :extra "\nDEADLINE: %^{Deadline:}t")
-;;                               ("Scheduled Task" :keys "s"
-;;                                :icon ("nf-oct-calendar" :set "octicon" :color "orange")
-;;                                :extra "\nSCHEDULED: %^{Start time:}t")))
-;;                   ("Project" :keys "p"
-;;                    :icon ("nf-oct-repo" :set "octicon" :color "silver")
-;;                    :prepend t
-;;                    :type entry
-;;                    :headline "Inbox"
-;;                    :template ("* %{time-or-todo} %?"
-;;                               "%i"
-;;                               "%a")
-;;                    :file ""
-;;                    :custom (:time-or-todo "")
-;;                    :children (("Project-local todo" :keys "t"
-;;                                :icon ("nf-oct-checklist" :set "octicon" :color "green")
-;;                                :time-or-todo "TODO"
-;;                                :file +org-capture-project-todo-file)
-;;                               ("Project-local note" :keys "n"
-;;                                :icon ("nf-fa-sticky_note" :set "faicon" :color "yellow")
-;;                                :time-or-todo "%U"
-;;                                :file +org-capture-project-notes-file)
-;;                               ("Project-local changelog" :keys "c"
-;;                                :icon ("nf-fa-list" :set "faicon" :color "blue")
-;;                                :time-or-todo "%U"
-;;                                :heading "Unreleased"
-;;                                :file +org-capture-project-changelog-file)))
-;;                   ("\tCentralised project templates"
-;;                    :keys "o"
-;;                    :type entry
-;;                    :prepend t
-;;                    :template ("* %{time-or-todo} %?"
-;;                               "%i"
-;;                               "%a")
-;;                    :children (("Project todo"
-;;                                :keys "t"
-;;                                :prepend nil
-;;                                :time-or-todo "TODO"
-;;                                :heading "Tasks"
-;;                                :file +org-capture-central-project-todo-file)
-;;                               ("Project note"
-;;                                :keys "n"
-;;                                :time-or-todo "%U"
-;;                                :heading "Notes"
-;;                                :file +org-capture-central-project-notes-file)
-;;                               ("Project changelog"
-;;                                :keys "c"
-;;                                :time-or-todo "%U"
-;;                                :heading "Unreleased"
-;;                                :file +org-capture-central-project-changelog-file)))))))
+  (defun set-org-capture-templates ()
+    (setq org-capture-templates
+          (doct `(("Personal todo" :keys "t"
+                   :icon ("nf-oct-checklist" :set "octicon" :color "green")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* TODO %?"
+                              "%i %a"))
+                  ("Personal note" :keys "n"
+                   :icon ("nf-fa-sticky_note_o" :set "faicon" :color "green")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* %?"
+                              "%i %a"))
+                  ("Email" :keys "e"
+                   :icon ("nf-fa-envelope" :set "faicon" :color "blue")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
+                              "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
+                              "about %^{topic}"
+                              "%U %i %a"))
+                  ("Interesting" :keys "i"
+                   :icon ("nf-fa-eye" :set "faicon" :color "lcyan")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Interesting"
+                   :type entry
+                   :template ("* [ ] %{desc}%? :%{i-type}:"
+                              "%i %a")
+                   :children (("Webpage" :keys "w"
+                               :icon ("nf-fa-globe" :set "faicon" :color "green")
+                               :desc "%(org-cliplink-capture) "
+                               :i-type "read:web")
+                              ("Article" :keys "a"
+                               :icon ("nf-fa-file_text_o" :set "faicon" :color "yellow")
+                               :desc ""
+                               :i-type "read:reaserch")
+                              ("\tRecipie" :keys "r"
+                               :icon ("nf-fa-spoon" :set "faicon" :color "dorange")
+                               :file +org-capture-recipies
+                               :headline "Unsorted"
+                               :template "%(org-chef-get-recipe-from-url)")
+                              ("Information" :keys "i"
+                               :icon ("nf-fa-info_circle" :set "faicon" :color "blue")
+                               :desc ""
+                               :i-type "read:info")
+                              ("Idea" :keys "I"
+                               :icon ("nf-md-chart_bubble" :set "mdicon" :color "silver")
+                               :desc ""
+                               :i-type "idea")))
+                  ("Tasks" :keys "k"
+                   :icon ("nf-oct-inbox" :set "octicon" :color "yellow")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Tasks"
+                   :type entry
+                   :template ("* TODO %? %^G%{extra}"
+                              "%i %a")
+                   :children (("General Task" :keys "k"
+                               :icon ("nf-oct-inbox" :set "octicon" :color "yellow")
+                               :extra "")
+                              ("Task with deadline" :keys "d"
+                               :icon ("nf-md-timer" :set "mdicon" :color "orange" :v-adjust -0.1)
+                               :extra "\nDEADLINE: %^{Deadline:}t")
+                              ("Scheduled Task" :keys "s"
+                               :icon ("nf-oct-calendar" :set "octicon" :color "orange")
+                               :extra "\nSCHEDULED: %^{Start time:}t")))
+                  ("Project" :keys "p"
+                   :icon ("nf-oct-repo" :set "octicon" :color "silver")
+                   :prepend t
+                   :type entry
+                   :headline "Inbox"
+                   :template ("* %{time-or-todo} %?"
+                              "%i"
+                              "%a")
+                   :file ""
+                   :custom (:time-or-todo "")
+                   :children (("Project-local todo" :keys "t"
+                               :icon ("nf-oct-checklist" :set "octicon" :color "green")
+                               :time-or-todo "TODO"
+                               :file +org-capture-project-todo-file)
+                              ("Project-local note" :keys "n"
+                               :icon ("nf-fa-sticky_note" :set "faicon" :color "yellow")
+                               :time-or-todo "%U"
+                               :file +org-capture-project-notes-file)
+                              ("Project-local changelog" :keys "c"
+                               :icon ("nf-fa-list" :set "faicon" :color "blue")
+                               :time-or-todo "%U"
+                               :heading "Unreleased"
+                               :file +org-capture-project-changelog-file)))
+                  ("\tCentralised project templates"
+                   :keys "o"
+                   :type entry
+                   :prepend t
+                   :template ("* %{time-or-todo} %?"
+                              "%i"
+                              "%a")
+                   :children (("Project todo"
+                               :keys "t"
+                               :prepend nil
+                               :time-or-todo "TODO"
+                               :heading "Tasks"
+                               :file +org-capture-central-project-todo-file)
+                              ("Project note"
+                               :keys "n"
+                               :time-or-todo "%U"
+                               :heading "Notes"
+                               :file +org-capture-central-project-notes-file)
+                              ("Project changelog"
+                               :keys "c"
+                               :time-or-todo "%U"
+                               :heading "Unreleased"
+                               :file +org-capture-central-project-changelog-file)))))))
 
-;;   (set-org-capture-templates)
-;;   (unless (display-graphic-p)
-;;     (add-hook 'server-after-make-frame-hook
-;;               (defun org-capture-reinitialise-hook ()
-;;                 (when (display-graphic-p)
-;;                   (set-org-capture-templates)
-;;                   (remove-hook 'server-after-make-frame-hook
-;;                                #'org-capture-reinitialise-hook))))))
-;;                                         ;### It would also be nice to improve how the capture dialogue looks
+  (set-org-capture-templates)
+  (unless (display-graphic-p)
+    (add-hook 'server-after-make-frame-hook
+              (defun org-capture-reinitialise-hook ()
+                (when (display-graphic-p)
+                  (set-org-capture-templates)
+                  (remove-hook 'server-after-make-frame-hook
+                               #'org-capture-reinitialise-hook))))))
+;;### It would also be nice to improve how the capture dialogue looks
 
-;;                                         ;### prettify-captureEmacs Lisp
-;;                                         ;### The org-capture bin is rather nice, but I’d be nicer with a smaller frame, and no modeline.
+;;### prettify-captureEmacs Lisp
+;;### The org-capture bin is rather nice, but I’d be nicer with a smaller frame, and no modeline.
 
-;; ;#
-;; (setf (alist-get 'height +org-capture-frame-parameters) 15)
-;; ;; (alist-get 'name +org-capture-frame-parameters) "❖ Capture") ;; ATM hardcoded in other places, so changing breaks stuff
+                                        ;#
+(setf (alist-get 'height +org-capture-frame-parameters) 15)
+;; (alist-get 'name +org-capture-frame-parameters) "❖ Capture") ;; ATM hardcoded in other places, so changing breaks stuff
 ;; (setq +org-capture-fn
 ;;       (lambda ()
 ;;         (interactive)
 ;;         (set-window-parameter nil 'mode-line-format 'none)
 ;;         (org-capture)))
+;;
+;; org mode todo toggle
+;; (defun org-toggle-todo-and-fold ()
+;;   (interactive)
+;;   (save-excursion
+;;     (org-back-to-heading t) ;; Make sure command works even if point is
+;;                             ;; below target heading
+;;     (cond ((looking-at "\*+ TODO")
+;;            (org-todo "DONE")
+;;            (hide-subtree))
+;;           ((looking-at "\*+ DONE")
+;;            (org-todo "TODO")
+;;            (hide-subtree))
+;;           (t (message "Can only toggle between TODO and DONE.")))))
+
+;; (define-key org-mode-map (kbd "C-c C-d") 'org-toggle-todo-and-fold)
 
 ;;################# Activate beacon mode ###############################
 (beacon-mode 1)
@@ -381,7 +395,7 @@
 ;; Trainer on all the time
 (global-evil-motion-trainer-mode 1)
 ;;Configure the number of permitted repeated key presses:
-(setq evil-motion-trainer-threshold 10)
+(setq evil-motion-trainer-threshold 60)
                                         ;Enable a super annoying mode that pops a warning in a buffer:
                                         ;(setq evil-motion-trainer-super-annoying-mode t)
 ;; Add to the suggested alternatives for a key:
@@ -403,4 +417,47 @@
         evil-owl-max-string-length 50)
   (evil-owl-mode))
 ;;################## Maximized on start up #################
-radd-to-list 'initial-frame-alist '(fullscreen . maximized))
+;; (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+(add-hook 'window-setup-hook #'toggle-frame-maximized)
+(add-hook 'window-setup-hook #'toggle-frame-fullscreen)
+;; ################## Clever ref on reftex and auctex#################
+(eval-after-load
+    "Latex"
+  '(TeX-add-style-hook
+    "cleveref"
+    (lambda ()
+      (if (boundp 'reftex-ref-style-alist)
+          (add-to-list
+           'reftex-ref-style-alist
+           '("Cleveref" "cleveref"
+             (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
+      (reftex-ref-style-activate "Cleveref")
+      (TeX-add-symbols
+       '("cref" TeX-arg-ref)
+       '("Cref" TeX-arg-ref)
+       '("cpageref" TeX-arg-ref)
+       '("Cpageref" TeX-arg-ref)))))
+
+;; ############################## org-roam-ui settings ######################
+;;
+(use-package! websocket
+  :after org-roam)
+
+(use-package! org-roam-ui
+  :after org-roam ;; or :after org
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;;  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
+
+;; #################### Org roam ##################################
+(setq org-roam-directory "~/org/roam")
+;;######## deft ##############################
+(setq deft-directory "~/org/roam"
+      deft-extensions '("org" "txt" "md")
+      deft-recursive t)

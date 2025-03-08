@@ -105,3 +105,11 @@
                                         ;##### Evil Nerd Commenter#############
                                         ;maybe enable evil-googles-nerd-commenter in the config file
 (package! evil-nerd-commenter)
+
+;;      org-roam-gui
+(unpin! org-roam)
+(package! org-roam-ui)
+;; #### zettle desk for org roam #####
+;;
+(package! zetteldesk
+  :recipe (:host github :repo "Vidianos-Giannitsis/zetteldesk.el" :files ("*.el")))
