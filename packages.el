@@ -113,3 +113,10 @@
 ;;
 (package! zetteldesk
   :recipe (:host github :repo "Vidianos-Giannitsis/zetteldesk.el" :files ("*.el")))
+;; ###### vulpea (for org-roam) #### FIXME: There was an unexpected runtime error Message: Symbol's function definition is void Details: (use-package!) Backtrace: (use-package! vulpea :demand t :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
+;; seen in  https://www.d12frosted.io/posts/2021-05-21-task-management-with-roam-vol7
+;; github page https://github.com/d12frosted/vulpea
+(package! vulpea
+  :demand t
+  :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
+(package! typewriter-roll-mode )

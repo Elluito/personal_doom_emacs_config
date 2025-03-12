@@ -81,8 +81,8 @@
 ;; ################ Start as server  ###################
 ;; This is just so it can do inverse search with okular while wirting latex documents
 
-                                        ;(server-start)
-                                        ; Aparently doom emac start the server itself acording to numeral 7 on this link https://discourse.doomemacs.org/t/common-config-anti-patterns/119
+;; (server-start)
+;; Aparently doom emac start the server itself acording to numeral 7 on this link https://discourse.doomemacs.org/t/common-config-anti-patterns/119
 
 
 
@@ -147,7 +147,7 @@
   (super-save-mode +1)
   ;;Saves when idle
   (setq super-save-auto-save-when-idle t)
-  ;; deactivates emacs's default autosave (it already is turned off by default in doom emacs but ill put it her anyway)
+  ;; deactivates emacs's default autosave (it already is turned off by default in doom emacs but ill put it here anyway)
   (setq auto-save-default nil)
   )
 
@@ -162,27 +162,27 @@
 ;; I wanted to do something like the smooth scroll in neovide
 ;; (good-scroll-mode 1)
 
-;;################ Org-capture code ########################################
-;; this piece of code is taken from https://gist.github.com/progfolio/af627354f87542879de3ddc30a31adc1
-(defun my/delete-capture-frame (&rest _)
-  "Delete frame with its name frame-parameter set to \"capture\"."
-  (if (equal "capture" (frame-parameter nil 'name))
-      (delete-frame)))
+;; (defun my/org-roam-capture-frame ()
+;;   "Run org-capture in its own frame."
+;;   (interactive)
+;;   (require 'cl-lib)
+;;   (select-frame-by-name "roam-capture")
+;;   (delete-other-windows)
+;;   (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+;;     (condition-case err
+;;         (org-roam-capture)
+;;       ;; "q" signals (error "Abort") in `org-capture'
+;;       ;; delete the newly created frame in this scenario.
+;;       (user-error (when (string= (cadr err) "Abort")
+;;                     (delete-frame))))))
 
-(advice-add 'org-capture-finalize :after #'my/delete-capture-frame)
-(defun my/org-capture-frame ()
-  "Run org-capture in its own frame."
-  (interactive)
-  (require 'cl-lib)
-  (select-frame-by-name "capture")
-  (delete-other-windows)
-  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
-    (condition-case err
-        (org-capture)
-      ;; "q" signals (error "Abort") in `org-capture'
-      ;; delete the newly created frame in this scenario.
-      (user-error (when (string= (cadr err) "Abort")
-                    (delete-frame))))))
+;; (defun my/delete-roam-capture-frame (&rest _)
+;;   "Delete frame with its name frame-parameter set to \"capture\"."
+;;   (if (equal "roam-capture" (frame-parameter nil 'name))
+;;       (delete-frame)))
+
+
+
 ;; #################### org- capture config###################
 ;; Taken from  https://tecosaur.github.io/emacs-config/config.html
 ;;TODO: Fix the FIXME down here to actually use this pretty config
@@ -239,27 +239,20 @@
                    :headline "Inbox"
                    :type entry
                    :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
-                              "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
+                              "Send an email %^{urgency|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
                               "about %^{topic}"
                               "%U %i %a"))
-                  ("Roam" :keys "r"
-                   :icon ("nf-fa-eye" :set "faicon" :color "lcyan")
-                   :prepend t
-                   :headline "Roam Note"
-                   :type plain
-                   :children (("d" "default" plain
-      "%?"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)
-     ("b" "book notes" plain
-      "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)
-
-
-                              )
-                   
-                   )
+                  ;; ("Roam" :keys "r"
+                  ;;  :icon ("nf-fa-eye" :set "faicon" :color "lcyan")
+                  ;;  :prepend t
+                  ;;  :headline "Roam Note"
+                  ;;  :type plain
+                  ;;  :children (("d" "default" plain "%?"
+                  ;;              :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+                  ;;              :unnarrowed t)
+                  ;;             ("b" "book notes" plain "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+                  ;;              :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+                  ;;              :unnarrowed t)))
                   ("Interesting" :keys "i"
                    :icon ("nf-fa-eye" :set "faicon" :color "lcyan")
                    :file +org-capture-todo-file
@@ -275,7 +268,7 @@
                               ("Article" :keys "a"
                                :icon ("nf-fa-file_text_o" :set "faicon" :color "yellow")
                                :desc ""
-                               :i-type "read:reaserch")
+                               :i-type "read:research")
                               ("\tRecipie" :keys "r"
                                :icon ("nf-fa-spoon" :set "faicon" :color "dorange")
                                :file +org-capture-recipies
@@ -391,6 +384,28 @@
 
 ;; (define-key org-mode-map (kbd "C-c C-d") 'org-toggle-todo-and-fold)
 
+;;################ Org-capture code ########################################
+;; this piece of code is taken from https://gist.github.com/progfolio/af627354f87542879de3ddc30a31adc1
+(defun my/delete-capture-frame (&rest _)
+  "Delete frame with its name frame-parameter set to \"capture\"."
+  (if (equal "capture" (frame-parameter nil 'name))
+      (delete-frame)))
+
+(advice-add 'org-capture-finalize :after #'my/delete-capture-frame)
+
+(defun my/org-capture-frame ()
+  "Run org-capture in its own frame."
+  (interactive)
+  (require 'cl-lib)
+  (select-frame-by-name "capture")
+  (delete-other-windows)
+  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+    (condition-case err
+        (org-capture)
+      ;; "q" signals (error "Abort") in `org-capture'
+      ;; delete the newly created frame in this scenario.
+      (user-error (when (string= (cadr err) "Abort")
+                    (delete-frame))))))
 ;;################# Activate beacon mode ###############################
 (beacon-mode 1)
 ;;################# Evil easy-motion ###############################
@@ -472,10 +487,130 @@
         org-roam-ui-follow t
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
+;;############# Some oorg mode keybindings found in https://michaelneuper.com/posts/how-i-use-org-roam-to-takes-notes-for-cs/
+(after! org
+  (add-to-list 'org-latex-packages-alist '("" "amsmath" t))
+  (add-to-list 'org-latex-packages-alist '("" "amssymb" t))
+  (add-to-list 'org-latex-packages-alist '("" "mathtools" t))
+  (add-to-list 'org-latex-packages-alist '("" "mathrsfs" t)))
+(add-hook 'org-mode-hook #'xenops-mode)
+(setq xenops-math-image-scale-factor 1.7
+      xenops-reveal-on-entry t)
 
 ;; #################### Org roam ##################################
-(setq org-roam-directory "~/org/roam")
+;; taken from https://systemcrafters.net/build-a-second-brain-in-emacs/capturing-notes-efficiently/
+(use-package! org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/org/roam")
+  (org-roam-completion-everywhere t)
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+     ;; ("b" "book notes" plain
+     ;;  "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+     ;;  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+     ;;  :unnarrowed t)
+     ("b" "Literature note (book or article)" plain
+      (file "~/org/roam/templates/literature.org")
+      :target (file+head
+               "reference/%<%Y%m%d%H%M%S>-literature-${slug}.org"
+               "#+title: ${Year}, ${Author}: ${Title}\n#+filetags: :literature:\n\n")
+      :empty-lines-before 2
+      :unnarrowed t)
+
+     ))
+  ;; :bind (("C-c n l" . org-roam-buffer-toggle)
+  ;;        ("C-c n f" . org-roam-node-find)
+  ;;        ("C-c n i" . org-roam-node-insert)
+  ;;        :map org-mode-map
+  ;;        ("C-M-i" . completion-at-point))
+  :config
+  (org-roam-setup)
+  )
+
+(defun my/org-roam-capture-frame ()
+  "Run org-capture in its own frame."
+  (interactive)
+  (require 'cl-lib)
+  (select-frame-by-name "capture")
+  (delete-other-windows)
+  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+    (condition-case err
+        (org-roam-mode)
+      ;; "q" signals (error "Abort") in `org-capture'
+      ;; delete the newly created frame in this scenario.
+      (user-error (when (string= (cadr err) "Abort")
+                    (delete-frame))))))
+
+(defun my/delete-roam-capture-frame (&rest _)
+  "Delete frame with its name frame-parameter set to \"capture\"."
+  (if (equal "capture" (frame-parameter nil 'name))
+      (delete-frame)))
+
+(advice-add 'org-roam-capture--finalize :after #'my/delete-roam-capture-frame)
 ;;######## deft ##############################
 (setq deft-directory "~/org/roam"
       deft-extensions '("org" "txt" "md")
       deft-recursive t)
+
+;;####################### AI Writer mode  ####################
+;;taken from https://kodfabrik.com/journal/ia-writer-mode-for-emacs
+;; (defun aiwriting-mode ()
+;;   (interactive)
+;;   (setq buffer-face-mode-face '(:family "dejavu sans mono" :height 150))
+;;   (buffer-face-mode)
+;;   (writeroom-mode 1)
+;;   (blink-cursor-mode)
+;;   (visual-line-mode 1)
+;;   (setq truncate-lines 1)
+;;   (setq-default line-spacing 5)
+;;   (setq global-hl-line-mode nil)
+;;   )
+;; ;;We'll define a function that will be triggered whenever we want to enable it. Here is an empty function and a hook for markdown-mode
+
+;; (add-hook 'markdown-mode-hook 'writing-mode)
+;; ;;  tell Emacs to use markdown-mode in *scratch* to bring up the writing mode easily:
+;; (setq initial-major-mode 'markdown-mode)
+
+;;### Create ai writer minor mode with the base code from  https://systemcrafters.net/learning-emacs-lisp/creating-minor-modes/ and https://kodfabrik.com/journal/ia-writer-mode-for-emacs
+;; (make-variable-buffer-local
+;;  (defvar aiwriting-mode nil
+;;    "Toggle aiwriting-mode."))
+
+;; (defvar aiwriting-mode-map (make-sparse-keymap)
+;;   "The keymap for aiwriting-mode")
+
+;; ;; Define a key in the keymap
+;; (define-key 'aiwriting-map (kbd "C-c C-. t")
+;;             (lambda ()
+;;               (interactive)
+;;               (message "aiwriting key binding used!")))
+
+;; (add-to-list 'minor-mode-alist '(aiwriting-mode " aiwriting"))
+;; (add-to-list 'minor-mode-map-alist (cons 'aiwriting-mode aiwriting-mode-map))
+
+;; (defun aiwriting-mode (&optional ARG)
+;;   (interactive (list 'toggle))
+;;   (setq aiwriting-mode
+;;         (if (eq ARG 'toggle)
+;;             (not aiwriting-mode)
+;;           (> ARG 0))
+;;         (setq buffer-face-mode-face '(:family "dejavu sans mono" :height 150))
+;;         (buffer-face-mode)
+;;         (writeroom-mode 1)
+;;         (blink-cursor-mode)
+;;         (visual-line-mode 1)
+;;         (setq truncate-lines 1)
+;;         (setq-default line-spacing 5)
+;;         (setq global-hl-line-mode nil)
+;;         )
+
+;;   ;; Take some action when enabled or disabled
+;;   (if aiwriting-mode
+;;       (message "aiwriting-mode activated!")
+;;     (message "aiwriting-mode deactivated!")))
