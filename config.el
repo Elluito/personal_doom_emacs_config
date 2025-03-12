@@ -242,6 +242,24 @@
                               "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
                               "about %^{topic}"
                               "%U %i %a"))
+                  ("Roam" :keys "r"
+                   :icon ("nf-fa-eye" :set "faicon" :color "lcyan")
+                   :prepend t
+                   :headline "Roam Note"
+                   :type plain
+                   :children (("d" "default" plain
+      "%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+     ("b" "book notes" plain
+      "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+
+
+                              )
+                   
+                   )
                   ("Interesting" :keys "i"
                    :icon ("nf-fa-eye" :set "faicon" :color "lcyan")
                    :file +org-capture-todo-file
