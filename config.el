@@ -32,8 +32,8 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-;; (setq doom-theme 'doom-monokai-pro)
-(setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'doom-monokai-pro)
+;; (setq doom-theme 'doom-gruvbox)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -41,7 +41,7 @@
 ;;############################## Org-mode Settings ##############
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
+(setq org-directory "~/Dropbox/org/")
 
 
 
@@ -277,10 +277,12 @@
                               ("Information" :keys "i"
                                :icon ("nf-fa-info_circle" :set "faicon" :color "blue")
                                :desc ""
+                               :file "/home/luisaam/org/roam/20250313124731-inbox.org"
                                :i-type "read:info")
                               ("Idea" :keys "I"
                                :icon ("nf-md-chart_bubble" :set "mdicon" :color "silver")
                                :desc ""
+                               :file "/home/luisaam/org/roam/20250313124731-inbox.org"
                                :i-type "idea")))
                   ("Tasks" :keys "k"
                    :icon ("nf-oct-inbox" :set "octicon" :color "yellow")
@@ -452,7 +454,7 @@
 ;;################## Maximized on start up #################
 ;; (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (add-hook 'window-setup-hook #'toggle-frame-maximized)
-(add-hook 'window-setup-hook #'toggle-frame-fullscreen)
+;; (add-hook 'window-setup-hook #'toggle-frame-fullscreen)
 ;; ################## Clever ref on reftex and auctex#################
 (eval-after-load
     "Latex"
@@ -471,6 +473,13 @@
        '("cpageref" TeX-arg-ref)
        '("Cpageref" TeX-arg-ref)))))
 
+
+;; ########### Vulpea config from https://github.com/d12frosted/vulpea ##
+(use-package! vulpea
+  :demand t
+  :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
+;; (vulpea-find :other-window t)
+;;
 ;; ############################## org-roam-ui settings ######################
 ;;
 (use-package! websocket
@@ -504,17 +513,14 @@
   :init
   (setq org-roam-v2-ack t)
   :custom
-  (org-roam-directory "~/org/roam")
+  (org-roam-directory "~/Dropbox/org/roam")
   (org-roam-completion-everywhere t)
   (org-roam-capture-templates
+   ;;###### Old  templeates ##########
    '(("d" "default" plain
       "%?"
       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
       :unnarrowed t)
-     ;; ("b" "book notes" plain
-     ;;  "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
-     ;;  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-     ;;  :unnarrowed t)
      ("b" "Literature note (book or article)" plain
       (file "~/org/roam/templates/literature.org")
       :target (file+head
@@ -522,8 +528,15 @@
                "#+title: ${Year}, ${Author}: ${Title}\n#+filetags: :literature:\n\n")
       :empty-lines-before 2
       :unnarrowed t)
+     ("a" "article" plain "%?"
+      :if-new
+      (file+head "articles/${title}.org" "#+title: ${title}\n#+filetags: :article:\n")
+      :immediate-finish t
+      :unnarrowed t)
 
-     ))
+     )
+   )
+  ;;###################################
   ;; :bind (("C-c n l" . org-roam-buffer-toggle)
   ;;        ("C-c n f" . org-roam-node-find)
   ;;        ("C-c n i" . org-roam-node-insert)
@@ -533,6 +546,19 @@
   (org-roam-setup)
   )
 
+(cl-defmethod org-roam-node-type ((node org-roam-node))
+  "Return the TYPE of NODE."
+  (condition-case nil
+      (file-name-nondirectory
+       (directory-file-name
+        (file-name-directory
+         (file-relative-name (org-roam-node-file node) org-roam-directory))))
+    (error "")))
+(setq org-roam-node-display-template
+      (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+
+
+
 (defun my/org-roam-capture-frame ()
   "Run org-capture in its own frame."
   (interactive)
@@ -541,7 +567,10 @@
   (delete-other-windows)
   (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
     (condition-case err
-        (org-roam-mode)
+        ;; (vulpea-create
+        ;;  "Title of new note"
+        ;;  "~/org/roam/Inbox/%<%Y%m%d%H%M%S>-${slug}.org")
+        (org-capture)
       ;; "q" signals (error "Abort") in `org-capture'
       ;; delete the newly created frame in this scenario.
       (user-error (when (string= (cadr err) "Abort")
@@ -552,7 +581,12 @@
   (if (equal "capture" (frame-parameter nil 'name))
       (delete-frame)))
 
-(advice-add 'org-roam-capture--finalize :after #'my/delete-roam-capture-frame)
+(advice-add 'org-capture-finalize :after #'my/delete-roam-capture-frame)
+
+(defun jethro/tag-new-node-as-draft ()
+  (org-roam-tag-add '("draft")))
+(add-hook 'org-roam-capture-new-node-hook #'jethro/tag-new-node-as-draft)
+
 ;;######## deft ##############################
 (setq deft-directory "~/org/roam"
       deft-extensions '("org" "txt" "md")
@@ -599,6 +633,7 @@
 ;;   (setq aiwriting-mode
 ;;         (if (eq ARG 'toggle)
 ;;             (not aiwriting-mode)
+;;
 ;;           (> ARG 0))
 ;;         (setq buffer-face-mode-face '(:family "dejavu sans mono" :height 150))
 ;;         (buffer-face-mode)
@@ -614,3 +649,212 @@
 ;;   (if aiwriting-mode
 ;;       (message "aiwriting-mode activated!")
 ;;     (message "aiwriting-mode deactivated!")))
+;;
+;; Garbage collector
+;; taken from https://github.com/michaelneuper/doom
+(use-package! gcmh
+  :init
+  (setq gcmh-idle-delay 5
+        gcmh-high-cons-threshold (* 256 1024 1024))  ; 256MB during idle
+  :config
+  (gcmh-mode 1))
+
+(setq gc-cons-threshold 200000000) ; previous 33554432
+
+;; Buffer-flip
+;; ;; key to begin cycling buffers.  Global key.
+;; (global-set-key (kbd "C-<tab>") 'buffer-flip)
+
+;; ;; transient keymap used once cycling starts
+;; (setq buffer-flip-map
+;;       (let ((map (make-sparse-keymap)))
+;;         (define-key map (kbd "C-<tab>")   'buffer-flip-forward)
+;;         (define-key map (kbd "C-S-<tab>") 'buffer-flip-backward)
+;;         (define-key map (kbd "C-ESC")     'buffer-flip-abort)
+;;         map))
+
+;; ;; buffers matching these patterns will be skipped
+;; (setq buffer-flip-skip-patterns
+;;       '("^\\*helm\\b"
+;;         "^\\*swiper\\*$"
+;;         "^\\*scratch\\*$"
+;;         "^\\*messages\\*$"
+;;         "^\\*doom\\*$"))
+;; Buffer expose to jump visually to buffers
+;;
+;;(use-package! buffer-expose)
+(buffer-expose-mode 1)
+;; (defvar buffer-expose-mode-map
+;;   (let ((map (make-sparse-keymap)))
+;;     (define-key map (kbd "<C-M-tab>") 'buffer-expose)
+;;     (define-key map (kbd "<C-tab>") 'buffer-expose-no-stars)
+;;     (define-key map (kbd "C-c <C-tab>") 'buffer-expose-current-mode)
+;;     (define-key map (kbd "C-c C-m") 'buffer-expose-major-mode)
+;;     (define-key map (kbd "C-c C-d") 'buffer-expose-dired-buffers)
+;;     (define-key map (kbd "C-c C-*") 'buffer-expose-stars)
+;;     map)
+;;   "Mode map for command `buffer-expose-mode'.")
+;;
+
+;;; Function to open one frame and show my PARA.org file
+(defun my/open-para-org ()
+  "Run a frame with  PARA.org file in it"
+  (interactive)
+  (require 'cl-lib)
+  (select-frame-by-name "workflowy")
+  (delete-other-windows)
+  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+    (find-file "~/Dropbox/org/PARA.org")
+    (goto-char (org-find-exact-headline-in-buffer "Inbox 📥"))
+    )
+  )
+;; (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+;;   (condition-case err
+;;       (find-file "~/Dropbox/org/PARA.org")
+;;       (goto-char (org-find-exact-headline-in-buffer "Inbox 📥"))
+;;       ;; "q" signals (error "Abort") in `org-capture'
+;;       ;; delete the newly created frame in this scenario.
+;;       (user-error (when (string= (cadr err) "Abort")
+;;                     (delete-frame)))))
+;; )
+
+
+;;The following is for some workflowy like behaviour in org-mode taken from https://github.com/alaq/workflowy.el/blob/master/workflowy.el
+;;
+;;;###autoload
+;; (define-minor-mode workflowy-mode
+;;   "Workflowy's features in an emacs minor mode for org-mode."
+;;   nil nil nil
+;;   (org-indent-mode)
+;;   (add-hook 'org-mode-hook 'set-olivetti)
+;;   (add-hook 'org-mode-hook 'org-indent-mode)
+;;   (add-hook 'org-mode-hook #'org-bullet-mode)
+;;   (define-key org-mode-map (kbd "C-<")
+;;               'org-go-up-one-level)
+;;   (define-key org-mode-map (kbd "C->")
+;;     \          'org-go-down-one-level)
+;;   (define-key org-mode-map (kbd "RET")
+;;               'org-better-return)
+;;   (setq header-line-format (concat "%b/" (org-format-outline-path(org-get-outline-path))))
+;;   )
+(with-eval-after-load "org"
+  (define-key org-mode-map (kbd "s-<left>")
+              'org-go-up-one-level)
+  (define-key org-mode-map (kbd "s-<right>")
+              'org-go-down-one-level)
+  (map! :leader :desc "Go down one level" :n "s-<right>" #'org-go-down-one-level)
+  (map! :leader :desc "Go up one level" :n "s-<left>" #'org-go-up-one-level)
+  (define-key org-mode-map (kbd "SPC")
+              nil)
+  (define-key org-mode-map (kbd "SPC") nil)
+  (map! :leader :nv "z" nil)
+  (map! :leader :i "z" nil)
+  )
+
+(defun org-go-up-one-level ()
+  "go up one level, workflowy style"
+  (interactive)
+  (beginning-of-buffer)
+  (widen)
+  (setq header-line-format (concat "%b/" (org-format-outline-path(org-get-outline-path))))
+  (save-excursion
+    (org-up-element)
+    (org-narrow-to-subtree))
+  (beginning-of-buffer)
+  (recenter-top-bottom)
+  )
+
+;; (add-hook 'org-mode-hook #'org-change-bullets-depending-on-children)
+;; (add-hook 'org-mode-hook 'org-change-bullets-depending-on-children)
+
+(defun org-go-down-one-level ()
+  "drill down one level, workflowy style"
+  (interactive)
+  (org-narrow-to-subtree)
+  (org-show-children)
+  (setq header-line-format (concat "%b/" (org-format-outline-path(org-get-outline-path t)))))
+
+(defun org-has-children-p ()
+  (interactive)
+  (save-excursion
+    (org-goto-first-child)))
+
+(defun org-has-parent-p ()
+  (interactive)
+  (save-excursion
+    (org-up-element)))
+
+;; (require 'olivetti)
+;; (defun set-olivetti ()
+;;   "olivetti mode with default values"
+;;   (interactive)
+;;   (setq header-line-format "%b/")
+;;   (set-face-attribute 'header-line nil :background "#282c35")
+;;   (olivetti-mode)
+;;   (olivetti-set-width 100))
+
+;; original idea from http://kitchingroup.cheme.cmu.edu/blog/2017/04/09/A-better-return-in-org-mode/
+;; simplified below until a better one can be written
+;; a good idea would be to look into https://github.com/calvinwyoung/org-autolist/blob/master/org-autolist.el
+;; TODO RETURN in the middle of line should "cut" it
+;; TODO double return should enter a note, and not a bullet
+;; (defun org-better-return ()
+;;   (interactive)
+;;   (org-insert-heading-respect-content)
+;;   (evil-insert-state))
+
+
+;; ;; ;; below is wip
+;; (defun org-folded-p ()
+;;   "Returns non-nil if point is on a folded headline."
+;;   (and (org-at-heading-p)
+;;        (save-excursion (org-goto-first-child))
+;;        (invisible-p (point-at-eol))))
+
+;; (defun is-folded ()
+;;   "Interactive version of org-folded-p"
+;;   (interactive)
+;;   (if (org-folded-p) (message "yes") (message "no")))
+
+;; ;; replace bullets depending of the presence of child nodes or not
+;; (defcustom org-content (string-to-char "◉")
+;;   "Replacement for * as header prefixes."
+;;   :type 'characterp
+;;   :group 'org)
+
+;; (defcustom org-no-content (string-to-char "○")
+;;   "Replacement for * as header prefixes."
+;;   :type 'characterp
+;;   :group 'org)
+;;#######################################################################
+;;
+;;#######################################################################
+;; Next section is taken from https://zzamboni.org/post/my-doom-emacs-configuration-with-commentary/
+;;#######################################################################
+;;
+;;#################### org-download #########################
+(defun zz/org-download-paste-clipboard (&optional use-default-filename)
+  (interactive "P")
+  (require 'org-download)
+  (let ((file
+         (if (not use-default-filename)
+             (read-string (format "Filename [%s]: "
+                                  org-download-screenshot-basename)
+                          nil nil org-download-screenshot-basename)
+           nil)))
+    (org-download-clipboard file)))
+
+(after! org-download
+  (setq org-download-method 'directory)
+  (setq org-download-image-dir "images")
+  (setq org-download-heading-lvl nil)
+  (setq org-download-timestamp "%Y%m%d-%H%M%S_")
+  (setq org-image-actual-width 300)
+  (map! :map org-mode-map
+        "C-c l a y" #'zz/org-download-paste-clipboard
+        "C-M-y" #'zz/org-download-paste-clipboard))
+;; ############# org-mode-insert internal link ##############
+(map! :after counsel :map org-mode-map
+      "C-c l l h" #'counsel-org-link)
+(after! counsel
+  (setq counsel-outline-display-style 'title))

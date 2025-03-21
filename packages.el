@@ -106,17 +106,49 @@
                                         ;maybe enable evil-googles-nerd-commenter in the config file
 (package! evil-nerd-commenter)
 
+;; ###### vulpea (for org-roam) #### FIXME: There was an unexpected runtime error Message: Symbol's function definition is void Details: (use-package!) Backtrace: (use-package! vulpea :demand t :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
+;; seen in  https://www.d12frosted.io/posts/2021-05-21-task-management-with-roam-vol7
+;; github page https://github.com/d12frosted/vulpea
+(package! vulpea)
 ;;      org-roam-gui
 (unpin! org-roam)
+
 (package! org-roam-ui)
 ;; #### zettle desk for org roam #####
 ;;
 (package! zetteldesk
   :recipe (:host github :repo "Vidianos-Giannitsis/zetteldesk.el" :files ("*.el")))
-;; ###### vulpea (for org-roam) #### FIXME: There was an unexpected runtime error Message: Symbol's function definition is void Details: (use-package!) Backtrace: (use-package! vulpea :demand t :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
-;; seen in  https://www.d12frosted.io/posts/2021-05-21-task-management-with-roam-vol7
-;; github page https://github.com/d12frosted/vulpea
-(package! vulpea
-  :demand t
-  :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
+
 (package! typewriter-roll-mode )
+(package! gcmh)
+
+;; Org-noter
+(package! org-noter)
+(package! org-noter-pdftools)
+
+;; buffer-flip
+(package! buffer-flip)
+
+;; ACE window jump
+(package! ace-window)
+
+;; ACE  link
+(package! ace-link)
+
+;; buffer-expose
+(package! buffer-expose
+  :recipe (:host github :repo "clemera/buffer-expose"))
+;; Academic Phrases
+(package! academic-phrases)
+;;org-download
+(package! org-download)
+;; Universal sidecar
+(package! universal-sidecar)
+;; ebib (bibliography management for emacs)
+(package! ebib)
+;; universal-side-car for ebib (bibliography management for emacs)
+(package! ebib-sidecar)
+;; universal-side-car for roam (bibliography management for emacs)
+(package! universal-sidecar-roam)
+;;Eddit and view DJVU files
+(package! djvu)

@@ -1,6 +1,7 @@
+#!/bin/bash
 emacsclient --create-frame \
             --socket-name 'le_server' \
             --alternate-editor='' \
-            --frame-parameters='(quote (name . "capture"))' \
+            --frame-parameters='(quote (name . "workflowy"))' \
             --no-wait \
-            --eval "(my/org-roam-capture-frame)"
+            --eval "(my/open-para-org)"
