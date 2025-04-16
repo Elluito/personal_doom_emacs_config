@@ -32,8 +32,8 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-monokai-pro)
-;; (setq doom-theme 'doom-gruvbox)
+;; (setq doom-theme 'doom-monokai-pro)
+(setq doom-theme 'doom-gruvbox)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -123,20 +123,20 @@
 ;; ################ Snippets ##########################
 ;;
 ;;################# Biblio ############################
-(after! citar
-  (setq! citar-bibliography '("~/home/luisaam/Documents/Thesis/References/all_zotero_references.bib"))
-  (setq! citar-library-paths '("~/home/luisaam/Documents/Thesis/bReferences/"))
-  (setq! citar-notes-paths '("~/references/notes")))
+;; (after! citar
+;;   (setq! citar-bibliography '("~/home/luisaam/Documents/Thesis/References/all_zotero_references.bib"))
+;;   (setq! citar-library-paths '("~/home/luisaam/Documents/Thesis/bReferences/"))
+;;   (setq! citar-notes-paths '("~/references/notes")))
 
-(setq reftex-default-bibliography "~/home/luisaam/Documents/Thesis/References/all_zotero_references.bib")
-;; ################  Sniper package #####################
-;;
-(after! evil-snipe
-  (evil-snipe-mode +1)
-  (evil-snipe-override-mode +1)
-  (add-hook 'magit-mode-hook 'turn-off-evil-snipe-override-mode)
-  (setq evil-snipe-scope 'whole-visible)
-  )
+;; (setq reftex-default-bibliography "~/home/luisaam/Documents/Thesis/References/all_zotero_references.bib")
+;; ;; ################  Sniper package #####################
+;; ;;
+;; (after! evil-snipe
+;;   (evil-snipe-mode +1)
+;;   (evil-snipe-override-mode +1)
+;;   (add-hook 'magit-mode-hook 'turn-off-evil-snipe-override-mode)
+;;   (setq evil-snipe-scope 'whole-visible)
+;;   )
 
 
 ;; ###########################################################
@@ -588,7 +588,8 @@
 (add-hook 'org-roam-capture-new-node-hook #'jethro/tag-new-node-as-draft)
 
 ;;######## deft ##############################
-(setq deft-directory "~/org/roam"
+;;
+(setq deft-directory "~/Dropbox/org/"
       deft-extensions '("org" "txt" "md")
       deft-recursive t)
 
@@ -708,6 +709,29 @@
     (goto-char (org-find-exact-headline-in-buffer "Inbox 📥"))
     )
   )
+;;; Function to open one frame and show my journal.org file
+(defun my/open-scratch-org ()
+  "Run a frame with scratch.org file in it"
+  (interactive)
+  (require 'cl-lib)
+  (select-frame-by-name "_emacs_scratchpad_")
+  (delete-other-windows)
+  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+    (find-file "~/Dropbox/org/scratch.org")
+    ;; (goto-char (org-find-exact-headline-in-buffer "Inbox 📥"))
+    )
+  )
+(defun my/open-shell-org ()
+  "Run a frame with vterm in it"
+  (interactive)
+  (require 'cl-lib)
+  (select-frame-by-name "_emacs_terminal_")
+  (delete-other-windows)
+  (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
+    (vterm)
+    ;; (goto-char (org-find-exact-headline-in-buffer "Inbox 📥"))
+    )
+  )
 ;; (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer))
 ;;   (condition-case err
 ;;       (find-file "~/Dropbox/org/PARA.org")
@@ -738,17 +762,17 @@
 ;;   (setq header-line-format (concat "%b/" (org-format-outline-path(org-get-outline-path))))
 ;;   )
 (with-eval-after-load "org"
-  (define-key org-mode-map (kbd "s-<left>")
+  (define-key org-mode-map (kbd "C-<left>")
               'org-go-up-one-level)
-  (define-key org-mode-map (kbd "s-<right>")
+  (define-key org-mode-map (kbd "C-<right>")
               'org-go-down-one-level)
-  (map! :leader :desc "Go down one level" :n "s-<right>" #'org-go-down-one-level)
-  (map! :leader :desc "Go up one level" :n "s-<left>" #'org-go-up-one-level)
-  (define-key org-mode-map (kbd "SPC")
-              nil)
-  (define-key org-mode-map (kbd "SPC") nil)
-  (map! :leader :nv "z" nil)
-  (map! :leader :i "z" nil)
+  ;; (map! :leader :desc "Go down one level" :n "s-<right>" #'org-go-down-one-level)
+  ;; (map! :leader :desc "Go up one level" :n "s-<left>" #'org-go-up-one-level)
+  ;; (define-key org-mode-map (kbd "SPC")
+  ;;             nil)
+  ;; (define-key org-mode-map (kbd "SPC") nil)
+  ;; (map! :leader :nv "z" nil)
+  ;; (map! :leader :i "z" nil)
   )
 
 (defun org-go-up-one-level ()
@@ -853,8 +877,10 @@
   (map! :map org-mode-map
         "C-c l a y" #'zz/org-download-paste-clipboard
         "C-M-y" #'zz/org-download-paste-clipboard))
-;; ############# org-mode-insert internal link ##############
+;; ############# Org-mode-insert internal link ##############
 (map! :after counsel :map org-mode-map
       "C-c l l h" #'counsel-org-link)
 (after! counsel
   (setq counsel-outline-display-style 'title))
+;; ############### undo-tree ####################
+(global-undo-tree-mode 1)

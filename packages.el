@@ -152,3 +152,7 @@
 (package! universal-sidecar-roam)
 ;;Eddit and view DJVU files
 (package! djvu)
+;; Undo-tree
+(package! undo-tree)
+;; Harpoon (ThePrimeagen)
+(package! harpoon)
