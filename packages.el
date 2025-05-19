@@ -156,3 +156,5 @@
 (package! undo-tree)
 ;; Harpoon (ThePrimeagen)
 (package! harpoon)
+;; Acivity watch
+(package! activity-watch-mode)

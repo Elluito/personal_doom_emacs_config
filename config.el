@@ -21,8 +21,12 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :family "Fira Code" :size 15 :weight 'semi-light)
-      doom-variable-pitch-font (font-spec :family "Noto Sans" :size 16))
+(setq doom-font (font-spec :family "Fira Code" :size 15 :weight 'light)
+      doom-variable-pitch-font (font-spec :family "Noto Sans" :size 16)
+      ;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
+      ;; - `doom-symbol-font' -- for symbols
+
+      )
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -109,17 +113,33 @@
   (setq reftex-plug-into-AUCTeX t)
   ;; )                                     ;
   ;; ; This is for inverse search  taken from https://inthearmchair.wordpress.com/2010/09/02/latex-inverse-pdf-search-with-emacs/
-  ;; ;(add-hook ‘LaTeX-mode-hook ‘TeX-DF-mode)
-  ;; ;'(LaTeX-command "latex -synctex=1")
-  ;; ;'(TeX-output-view-style '(("^pdf$" "." "okular %s.pdf")))
+  ;; (add-hook 'LaTeX-mode-hook 'TeX-DF-mode)
+  '(LaTeX-command "latex -synctex=1")
+  '(TeX-output-view-style '(("^pdf$" "." "okular %s.pdf")))
 
-  ;; ;Taken from https://michaelneuper.com/posts/efficient-latex-editing-with-emacs/#cdlatex
+  ;; ;Taken from jhttps://michaelneuper.com/posts/efficient-latex-editing-with-emacs/#cdlatex
   (map! :map cdlatex-mode-map
         :i "TAB" #'cdlatex-tab)
   )
+;; Clever ref is recognised by reftex
+(eval-after-load
+    "latex"
+  '(TeX-add-style-hook
+    "cleveref"
+    (lambda ()
+      (if (boundp 'reftex-ref-style-alist)
+          (add-to-list
+           'reftex-ref-style-alist
+           '("Cleveref" "cleveref"
+             (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
+      (reftex-ref-style-activate "Cleveref")
+      (TeX-add-symbols
+       '("cref" TeX-arg-ref)
+       '("Cref" TeX-arg-ref)
+       '("cpageref" TeX-arg-ref)
+       '("Cpageref" TeX-arg-ref)))))
 
 ;; Activate nice interface between RefTeX and AUCTeX
-
 ;; ################ Snippets ##########################
 ;;
 ;;################# Biblio ############################
@@ -412,9 +432,7 @@
 (beacon-mode 1)
 ;;################# Evil easy-motion ###############################
 
-
 (evilem-default-keybindings "|")
-
 (evilem-define (kbd "| s") 'evil-snipe-repeat
                :pre-hook (save-excursion (call-interactively #'evil-snipe-s))
                :bind ((evil-snipe-scope 'buffer)
@@ -884,3 +902,56 @@
   (setq counsel-outline-display-style 'title))
 ;; ############### undo-tree ####################
 (global-undo-tree-mode 1)
+;; ############### Harpoon config for doom emacs########;;
+;;
+;; ;;On vanilla (You can use another prefix instead C-c h)
+
+;; ;; You can use this hydra menu that have all the commands
+;; (global-set-key (kbd "C-c a") 'harpoon-quick-menu-hydra)
+;; (global-set-key (kbd "C-c h <return>") 'harpoon-add-file)
+
+;; ;; And the vanilla commands
+;; (global-set-key (kbd "C-c h f") 'harpoon-toggle-file)
+;; (global-set-key (kbd "C-c h h") 'harpoon-toggle-quick-menu)
+;; (global-set-key (kbd "C-c h c") 'harpoon-clear)
+;; (global-set-key (kbd "C-c h 1") 'harpoon-go-to-1)
+;; (global-set-key (kbd "C-c h 2") 'harpoon-go-to-2)
+;; (global-set-key (kbd "C-c h 3") 'harpoon-go-to-3)
+;; (global-set-key (kbd "C-c h 4") 'harpoon-go-to-4)
+;; (global-set-key (kbd "C-c h 5") 'harpoon-go-to-5)
+;; (global-set-key (kbd "C-c h 6") 'harpoon-go-to-6)
+;; (global-set-key (kbd "C-c h 7") 'harpoon-go-to-7)
+;; (global-set-key (kbd "C-c h 8") 'harpoon-go-to-8)
+;; (global-set-key (kbd "C-c h 9") 'harpoon-go-to-9)
+
+;; On doom emacs
+
+;; You can use this hydra menu that have all the commands
+(map! :n "C-SPC" 'harpoon-quick-menu-hydra)
+(map! :n "C-s" 'harpoon-add-file)
+
+;; And the vanilla commands
+(map! :leader "j c" 'harpoon-clear)
+(map! :leader "j f" 'harpoon-toggle-file)
+(map! :leader "1" 'harpoon-go-to-1)
+(map! :leader "2" 'harpoon-go-to-2)
+(map! :leader "3" 'harpoon-go-to-3)
+(map! :leader "4" 'harpoon-go-to-4)
+(map! :leader "5" 'harpoon-go-to-5)
+(map! :leader "6" 'harpoon-go-to-6)
+(map! :leader "7" 'harpoon-go-to-7)
+(map! :leader "8" 'harpoon-go-to-8)
+(map! :leader "9" 'harpoon-go-to-9)
+
+;; And the vanilla commands
+;; (map! :leader "j c" 'harpoon-clear)
+;; (map! :leader "j f" 'harpoon-toggle-file)
+(map! :leader "\\ n" 'harpoon-go-to-1)
+(map! :leader "\\ e" 'harpoon-go-to-2)
+(map! :leader "\\ i" 'harpoon-go-to-3)
+(map! :leader "\\ o" 'harpoon-go-to-4)
+;; (map! :leader "5" 'harpoon-go-to-5)
+;; (map! :leader "6" 'harpoon-go-to-6)
+;; (map! :leader "7" 'harpoon-go-to-7)
+;; (map! :leader "8" 'harpoon-go-to-8)
+;; (map! :leader "9" 'harpoon-go-to-9)
