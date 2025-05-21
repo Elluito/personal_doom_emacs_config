@@ -158,3 +158,5 @@
 (package! harpoon)
 ;; Acivity watch
 (package! activity-watch-mode)
+;; Jupyter
+(package! jupyter)
