@@ -91,53 +91,99 @@
 
 
 ;; ################ Latex editing #####################
+;; 
 ;; (after! latex
 ;; (setq +latex-viewers '(pdf-tools))
 ;; These two lines are to ensure that LaTex-mode gets activated on every .tex
 ;; This has to do with some issue with versions of emacs older thatn 30  see : https://github.com/doomemacs/doomemacs/issues/8191
-(add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
-(setq major-mode-remap-alist major-mode-remap-defaults)
+;; 
+;; (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
+;; (setq major-mode-remap-alist major-mode-remap-defaults)    =============> I commented this on 14 sep 2026 as I use Emacs>30
+;; 
+;;################################################################################################### 
+;; ;; This to use the pdf viewer
+;; (setq +latex-viewers '(okular))
+;; ;; LSP server fot latex This still does not works texlab does not work as intended
+;; (setq lsp-tex-server 'texlab)
+;; ;; ;(after! latex
+;; ;; ;; This is for using xenops for rendering tables in buffer
+;; ;;
 
-;; This to use the pdf viewer
+;; (after! latex
+;;   (add-hook 'LaTeX-mode-hook #'xenops-mode) ;
+;;   ;; Turn on RefTeX in AUCTeX
+;;   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+;;   (setq reftex-plug-into-AUCTeX t)
+;;   ;; )                                     ;
+;;   ;; ; This is for inverse search  taken from https://inthearmchair.wordpress.com/2010/09/02/latex-inverse-pdf-search-with-emacs/
+;;   (add-hook 'LaTeX-mode-hook 'TeX-DF-mode)
+;;   '(LaTeX-command "latex -synctex=1")
+;;   '(TeX-output-view-style '(("^pdf$" "." "okular %s.pdf")))
+
+;;   ;; ;Taken from jhttps://michaelneuper.com/posts/efficient-latex-editing-with-emacs/#cdlatex
+;;   (map! :map cdlatex-mode-map
+;;         :i "TAB" #'cdlatex-tab)
+;;   )
+;; ;; Clever ref is recognised by reftex
+;; (eval-after-load
+;;     "latex"
+;;   '(TeX-add-style-hook
+;;     "cleveref"
+;;     (lambda ()
+;;       (if (boundp 'reftex-ref-style-alist)
+;;           (add-to-list
+;;            'reftex-ref-style-alist
+;;            '("Cleveref" "cleveref"
+;;              (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
+;;       (reftex-ref-style-activate "Cleveref")
+;;       (TeX-add-symbols
+;;        '("cref" TeX-arg-ref)
+;;        '("Cref" TeX-arg-ref)
+;;        '("cpageref" TeX-arg-ref)
+;;        '("Cpageref" TeX-arg-ref)))))
+
+
+;; ############################ Updated by gemini on 14 sep 2026 of the previous block
+;; 
+;; PDF viewer configuration
 (setq +latex-viewers '(okular))
-;; LSP server fot latex This still does not works texlab does not work as intended
+
+;; LSP server configuration
 (setq lsp-tex-server 'texlab)
-;; ;(after! latex
-;; ;; This is for useing xenops for endering tables in buffer
-;;
 
 (after! latex
-  (add-hook 'LaTeX-mode-hook #'xenops-mode) ;
-  ;; Turn on RefTeX in AUCTeX
-  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-  (setq reftex-plug-into-AUCTeX t)
-  ;; )                                     ;
-  ;; ; This is for inverse search  taken from https://inthearmchair.wordpress.com/2010/09/02/latex-inverse-pdf-search-with-emacs/
-  (add-hook 'LaTeX-mode-hook 'TeX-DF-mode)
-  '(LaTeX-command "latex -synctex=1")
-  '(TeX-output-view-style '(("^pdf$" "." "okular %s.pdf")))
+  ;; Xenops integration
+  (add-hook! 'LaTeX-mode-hook #'xenops-mode)
 
-  ;; ;Taken from jhttps://michaelneuper.com/posts/efficient-latex-editing-with-emacs/#cdlatex
+  ;; RefTeX is already enabled by Doom's :lang latex module, 
+  ;; but you can explicitly activate plug-in support if needed:
+  (setq reftex-plug-into-AUCTeX t)
+
+  ;; Enable SyncTeX for PDF forward/inverse search (removes broken TeX-DF-mode)
+  (setq TeX-source-correlate-mode t
+        TeX-source-correlate-method 'synctex)
+
+  ;; CDLaTeX keybindings using Doom's map! macro
   (map! :map cdlatex-mode-map
-        :i "TAB" #'cdlatex-tab)
-  )
-;; Clever ref is recognised by reftex
-(eval-after-load
-    "latex"
-  '(TeX-add-style-hook
-    "cleveref"
-    (lambda ()
-      (if (boundp 'reftex-ref-style-alist)
-          (add-to-list
-           'reftex-ref-style-alist
-           '("Cleveref" "cleveref"
-             (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
-      (reftex-ref-style-activate "Cleveref")
-      (TeX-add-symbols
-       '("cref" TeX-arg-ref)
-       '("Cref" TeX-arg-ref)
-       '("cpageref" TeX-arg-ref)
-       '("Cpageref" TeX-arg-ref)))))
+        :i "TAB" #'cdlatex-tab))
+
+;; Add cleveref support to RefTeX
+(after! latex
+  (TeX-add-style-hook
+   "cleveref"
+   (lambda ()
+     (when (boundp 'reftex-ref-style-alist)
+       (add-to-list 'reftex-ref-style-alist
+                    '("Cleveref" "cleveref"
+                      (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
+     (reftex-ref-style-activate "Cleveref")
+     (TeX-add-symbols
+      '("cref" TeX-arg-ref)
+      '("Cref" TeX-arg-ref)
+      '("cpageref" TeX-arg-ref)
+      '("Cpageref" TeX-arg-ref)))))
+
+
 
 ;; Activate nice interface between RefTeX and AUCTeX
 ;; ################ Snippets ##########################
@@ -493,7 +539,6 @@
 
 
 ;; ########### Vulpea config from https://github.com/d12frosted/vulpea ##
-
                                         ;(use-package! vulpea
                                         ;  :demand t
                                         ;  :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
