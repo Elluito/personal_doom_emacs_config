@@ -113,7 +113,7 @@
   (setq reftex-plug-into-AUCTeX t)
   ;; )                                     ;
   ;; ; This is for inverse search  taken from https://inthearmchair.wordpress.com/2010/09/02/latex-inverse-pdf-search-with-emacs/
-  ;; (add-hook 'LaTeX-mode-hook 'TeX-DF-mode)
+  (add-hook 'LaTeX-mode-hook 'TeX-DF-mode)
   '(LaTeX-command "latex -synctex=1")
   '(TeX-output-view-style '(("^pdf$" "." "okular %s.pdf")))
 
@@ -493,9 +493,10 @@
 
 
 ;; ########### Vulpea config from https://github.com/d12frosted/vulpea ##
-(use-package! vulpea
-  :demand t
-  :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
+
+                                        ;(use-package! vulpea
+                                        ;  :demand t
+                                        ;  :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable)))
 ;; (vulpea-find :other-window t)
 ;;
 ;; ############################## org-roam-ui settings ######################

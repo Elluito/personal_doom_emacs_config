@@ -160,3 +160,7 @@
 (package! activity-watch-mode)
 ;; Jupyter
 (package! jupyter)
+;; Cond-let package to solve an error
+(package! cond-let :recipe (:host github :repo "tarsius/cond-let"))
+;; Let-Completion package to solve an error
+(package! let-completion :recipe (:host github :repo "gggion/let-completion.el"))
