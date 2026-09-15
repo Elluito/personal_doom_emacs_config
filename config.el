@@ -143,31 +143,46 @@
 ;;        '("Cpageref" TeX-arg-ref)))))
 
 
-;; ############################ Updated by gemini on 14 sep 2026 of the previous block
-;; 
-;; PDF viewer configuration
+;; ############################ Updated by gemini on 14 sep 2026 of the previous block, mostly because emacs 30 broke some of my configurations
+;;
+;; In ~/.doom.d/config.el ==> 1.Fix the seq-empty-p Hook Crash in config.el:
+;; Workaround for Emacs 30 hook bug.
+;; Add a guard in your ~/.doom.d/config.el to ensure buffer-switching hooks do not break when mode states return non-sequence symbols like 'normal
+(defadvice! +latex-fix-seq-empty-p-a (orig-fn &rest args)
+  :around #'doom-run-switch-buffer-hooks-h
+  (ignore-errors (apply orig-fn args)))
+;; PDF Viewer
 (setq +latex-viewers '(okular))
 
-;; LSP server configuration
-(setq lsp-tex-server 'texlab)
-
 (after! latex
-  ;; Xenops integration
+  ;; Xenops for in-buffer image rendering
   (add-hook! 'LaTeX-mode-hook #'xenops-mode)
 
-  ;; RefTeX is already enabled by Doom's :lang latex module, 
-  ;; but you can explicitly activate plug-in support if needed:
-  (setq reftex-plug-into-AUCTeX t)
-
-  ;; Enable SyncTeX for PDF forward/inverse search (removes broken TeX-DF-mode)
+  ;; Enable SyncTeX for forward/inverse PDF search
   (setq TeX-source-correlate-mode t
         TeX-source-correlate-method 'synctex)
 
-  ;; CDLaTeX keybindings using Doom's map! macro
-  (map! :map cdlatex-mode-map
-        :i "TAB" #'cdlatex-tab))
+  ;; RefTeX plug-in support for AUCTeX
+  (setq reftex-plug-into-AUCTeX t)
 
-;; Add cleveref support to RefTeX
+  ;; CDLaTeX keybindings
+  (map! :map cdlatex-mode-map
+        :i "TAB" #'cdlatex-tab)
+
+  ;; Force file navigation for gd (had to add this when updated to Emacs 30>)
+  (map! :map LaTeX-mode-map
+        :nv "gd" #'+latex/find-matching-file))
+
+;; Texlab LSP Server Settings
+(after! lsp-latex
+  ;; Enable automatic building on save via texlab (optional)
+  (setq lsp-latex-build-on-save t)
+  
+  ;; Configure Okular forward search parameters for Texlab
+  (setq lsp-latex-forward-search-executable "okular"
+        lsp-latex-forward-search-args '("--unique" "file:%p#src:%l%f")))
+
+;; RefTeX Support for cleveref
 (after! latex
   (TeX-add-style-hook
    "cleveref"
@@ -182,7 +197,6 @@
       '("Cref" TeX-arg-ref)
       '("cpageref" TeX-arg-ref)
       '("Cpageref" TeX-arg-ref)))))
-
 
 
 ;; Activate nice interface between RefTeX and AUCTeX
@@ -519,23 +533,23 @@
 ;; (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (add-hook 'window-setup-hook #'toggle-frame-maximized)
 ;; (add-hook 'window-setup-hook #'toggle-frame-fullscreen)
-;; ################## Clever ref on reftex and auctex#################
-(eval-after-load
-    "Latex"
-  '(TeX-add-style-hook
-    "cleveref"
-    (lambda ()
-      (if (boundp 'reftex-ref-style-alist)
-          (add-to-list
-           'reftex-ref-style-alist
-           '("Cleveref" "cleveref"
-             (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
-      (reftex-ref-style-activate "Cleveref")
-      (TeX-add-symbols
-       '("cref" TeX-arg-ref)
-       '("Cref" TeX-arg-ref)
-       '("cpageref" TeX-arg-ref)
-       '("Cpageref" TeX-arg-ref)))))
+;; ;; ################## Clever ref on reftex and auctex#################
+;; (eval-after-load
+;;     "Latex"
+;;   '(TeX-add-style-hook
+;;     "cleveref"
+;;     (lambda ()
+;;       (if (boundp 'reftex-ref-style-alist)
+;;           (add-to-list
+;;            'reftex-ref-style-alist
+;;            '("\Cleveref" "cleveref"
+;;              (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
+;;       (reftex-ref-style-activate "Cleveref")
+;;       (TeX-add-symbols
+;;        '("cref" TeX-arg-ref)
+;;        '("Cref" TeX-arg-ref)
+;;        '("cpageref" TeX-arg-ref)
+;;        '("Cpageref" TeX-arg-ref)))))
 
 
 ;; ########### Vulpea config from https://github.com/d12frosted/vulpea ##
