@@ -4,6 +4,24 @@
 ;; sync' after modifying this file!
 
 
+;; Place at the VERY TOP of ~/.doom.d/config.el
+(defadvice! +fix-seq-empty-p-emacs30-a (orig-fn sequence)
+  :around #'seq-empty-p
+  (if (sequencep sequence)
+      (funcall orig-fn sequence)
+    t)) ; Treat non-sequences (like 'normal or nil) as empty to avoid crashes
+
+
+
+;; In ~/.doom.d/config.el ==>
+;; 1.Fix the seq-empty-p Hook Crash in config.el:
+;; Workaround for Emacs 30 hook bug.
+;; Add a guard in your ~/.doom.d/config.el to ensure buffer-switching hooks do not break when mode states return non-sequence symbols like 'normal
+
+;; (defadvice! +latex-fix-seq-empty-p-a (orig-fn &rest args)
+;;   :around #'doom-run-switch-buffer-hooks-h
+;;   (ignore-errors (apply orig-fn args)))
+
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
 (setq user-full-name "Luis Alfredo Avendaño Muñoz"
@@ -145,18 +163,36 @@
 
 ;; ############################ Updated by gemini on 14 sep 2026 of the previous block, mostly because emacs 30 broke some of my configurations
 ;;
-;; In ~/.doom.d/config.el ==> 1.Fix the seq-empty-p Hook Crash in config.el:
-;; Workaround for Emacs 30 hook bug.
-;; Add a guard in your ~/.doom.d/config.el to ensure buffer-switching hooks do not break when mode states return non-sequence symbols like 'normal
-(defadvice! +latex-fix-seq-empty-p-a (orig-fn &rest args)
-  :around #'doom-run-switch-buffer-hooks-h
-  (ignore-errors (apply orig-fn args)))
 ;; PDF Viewer
 (setq +latex-viewers '(okular))
+;; set Texlab
+;; (setq lsp-tex-server 'texlab)
 
 (after! latex
   ;; Xenops for in-buffer image rendering
-  (add-hook! 'LaTeX-mode-hook #'xenops-mode)
+  
+  ;; (add-hook! 'LaTeX-mode-hook #'xenops-mode)
+  
+  ;; Automatically start LSP in LaTeX buffers
+  
+  ;; (add-hook! 'LaTeX-mode-hook #'lsp!)
+  ;; Force load AUCTeX font-locking engine
+  (require 'font-latex)
+
+
+  ;; Force AUCTeX font-lock setup on LaTeX buffer entry
+  (add-hook 'LaTeX-mode-hook #'font-lock-mode)
+
+  ;; Prevent LSP semantic tokens from overriding AUCTeX syntax colors
+  (setq lsp-semantic-tokens-enable nil)
+
+  ;; ;; Explicitly map gd to lsp-find-definition
+  ;; (map! :map LaTeX-mode-map
+  ;;       :nv "gd" #'lsp-find-definition))
+  
+  ;; Fallback: Uses AUCTeX macro lookup (opens \input{...} files directly) 
+  ;; (map! :map LaTeX-mode-map
+  ;;       :nv "gd" #'TeX-find-macro)
 
   ;; Enable SyncTeX for forward/inverse PDF search
   (setq TeX-source-correlate-mode t
@@ -169,21 +205,7 @@
   (map! :map cdlatex-mode-map
         :i "TAB" #'cdlatex-tab)
 
-  ;; Force file navigation for gd (had to add this when updated to Emacs 30>)
-  (map! :map LaTeX-mode-map
-        :nv "gd" #'+latex/find-matching-file))
-
-;; Texlab LSP Server Settings
-(after! lsp-latex
-  ;; Enable automatic building on save via texlab (optional)
-  (setq lsp-latex-build-on-save t)
-  
-  ;; Configure Okular forward search parameters for Texlab
-  (setq lsp-latex-forward-search-executable "okular"
-        lsp-latex-forward-search-args '("--unique" "file:%p#src:%l%f")))
-
-;; RefTeX Support for cleveref
-(after! latex
+  ;; RefTeX Support for cleveref
   (TeX-add-style-hook
    "cleveref"
    (lambda ()
@@ -197,6 +219,42 @@
       '("Cref" TeX-arg-ref)
       '("cpageref" TeX-arg-ref)
       '("Cpageref" TeX-arg-ref)))))
+
+
+
+
+;; Force file navigation for gd (had to add this when updated to Emacs 30>)
+;; (map! :map LaTeX-mode-map
+;;       :nv "gd" #'+lookup/definition)
+
+;; Texlab LSP Server Settings
+(after! lsp-latex
+  ;; Configure texlab root directory detection and search paths
+  (setq lsp-latex-texlab-project-path-root-identifiers
+        '(".git" "main.tex" "master.tex" "Makefile" "latexmkrc"))
+  ;; Enable automatic search for bib files and inputs
+  (setq lsp-latex-texlab-search-bib-files-at-root-key t)
+  ;; Enable automatic building on save via texlab (optional)
+  (setq lsp-latex-build-on-save t)
+  ;; Configure Okular forward search parameters for Texlab
+  (setq lsp-latex-forward-search-executable "okular"
+        lsp-latex-forward-search-args '("--unique" "file:%p#src:%l%f")))
+
+;; RefTeX Support for cleveref
+;; (after! latex
+;;   (TeX-add-style-hook
+;;    "cleveref"
+;;    (lambda ()
+;;      (when (boundp 'reftex-ref-style-alist)
+;;        (add-to-list 'reftex-ref-style-alist
+;;                     '("Cleveref" "cleveref"
+;;                       (("\\cref" ?c) ("\\Cref" ?C) ("\\cpageref" ?d) ("\\Cpageref" ?D)))))
+;;      (reftex-ref-style-activate "Cleveref")
+;;      (TeX-add-symbols
+;;       '("cref" TeX-arg-ref)
+;;       '("Cref" TeX-arg-ref)
+;;       '("cpageref" TeX-arg-ref)
+;;       '("Cpageref" TeX-arg-ref)))))
 
 
 ;; Activate nice interface between RefTeX and AUCTeX

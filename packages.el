@@ -92,7 +92,8 @@
 (package! beacon)
 
 ;;################################### Undo tree ####################################
-(package! undo-tree)
+;;      Comment because it conflicts with undo-fu
+;; (package! undo-tree)
 ;;################################### evil-easymotion ####################################
 (package! evil-easymotion)
 ;;################################### Evil motion trainer ####################################
